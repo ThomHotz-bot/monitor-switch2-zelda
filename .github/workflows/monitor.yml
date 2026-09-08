@@ -1,9 +1,6 @@
 name: Monitor Switch 2 Zelda
 
 on:
-  schedule:
-    - cron: '0 12 * * *'
-
   workflow_dispatch:
 
 jobs:
@@ -19,7 +16,26 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: python main.py
+      - run: |
+          echo "========================"
+          echo "ARQUIVOS DO REPOSITORIO"
+          echo "========================"
+
+          ls -la
+
+          echo ""
+          echo "========================"
+          echo "CONTEUDO DO MAIN.PY"
+          echo "========================"
+
+          cat main.py
+
+          echo ""
+          echo "========================"
+          echo "EXECUTANDO PYTHON"
+          echo "========================"
+
+          python main.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

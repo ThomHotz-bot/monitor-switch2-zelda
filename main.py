@@ -8,7 +8,7 @@ ARQUIVO = "precos.csv"
 PRECO_ALVO = float(os.getenv("PRICE_TARGET", 3799))
 
 # PREÇO DE TESTE
-# depois vamos trocar pela captura real
+# Depois vamos substituir pela busca real nas lojas
 preco_atual = 3999
 
 nova_linha = pd.DataFrame([
@@ -36,13 +36,15 @@ historico.to_csv(
 )
 
 print("Histórico atualizado")
+print(f"Preço atual: {preco_atual}")
+print(f"Preço alvo: {PRECO_ALVO}")
 
 if preco_atual <= PRECO_ALVO:
 
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
-    requests.post(
+    resposta = requests.post(
         f"https://api.telegram.org/bot{token}/sendMessage",
         json={
             "chat_id": chat_id,
@@ -60,4 +62,9 @@ R$ {PRECO_ALVO}
         }
     )
 
+    print(f"Status Telegram: {resposta.status_code}")
     print("Alerta enviado")
+
+else:
+    print("Preço acima da meta")
+``

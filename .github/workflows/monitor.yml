@@ -3,6 +3,9 @@ name: Monitor Switch 2 Zelda
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   monitor:
     runs-on: ubuntu-latest
@@ -17,27 +20,19 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: |
-          echo "========================"
-          echo "ARQUIVOS DO REPOSITORIO"
-          echo "========================"
-
-          ls -la
-
-          echo ""
-          echo "========================"
-          echo "CONTEUDO DO MAIN.PY"
-          echo "========================"
-
-          cat main.py
-
-          echo ""
-          echo "========================"
-          echo "EXECUTANDO PYTHON"
-          echo "========================"
-
-          python main.py
+      - run: python main.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           PRICE_TARGET: ${{ secrets.PRICE_TARGET }}
+
+      - name: Commit historico
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add precos.csv
+
+          git diff --staged --quiet || git commit -m "Atualiza histórico de preços"
+
+          git push

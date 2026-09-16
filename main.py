@@ -79,7 +79,7 @@ with open(
         preco_avista,
         parcelas,
         total_parcelado,
-        "https://exemplo.com"
+        "https://exemplo.com",
         "Teste"
     ])
 

@@ -1,6 +1,5 @@
+from playwright.sync_api import sync_playwright
 import csv
-import requests
-import re
 
 with open(
     "produtos.csv",
@@ -14,39 +13,23 @@ with open(
 
 url = produto["url"]
 
-headers = {
-    "User-Agent": "Mozilla/5.0"
-}
+with sync_playwright() as p:
 
-resposta = requests.get(
-    url,
-    headers=headers,
-    timeout=30
-)
-
-print("Status:", resposta.status_code)
-
-texto = resposta.text
-
-print("\n=== BUSCANDO REFERÊNCIAS DE PREÇO ===\n")
-
-padroes = [
-    r'price',
-    r'PRICE',
-    r'amount',
-    r'currency',
-    r'offers'
-]
-
-for padrao in padroes:
-
-    print(f"\n--- {padrao} ---")
-
-    encontrados = re.findall(
-        rf'.{{0,100}}{padrao}.{{0,100}}',
-        texto,
-        re.IGNORECASE
+    browser = p.chromium.launch(
+        headless=True
     )
 
-    for item in encontrados[:10]:
-        print(item)
+    page = browser.new_page()
+
+    page.goto(
+        url,
+        wait_until="networkidle"
+    )
+
+    print("TÍTULO DA PÁGINA:")
+    print(page.title())
+
+    print("\nURL FINAL:")
+    print(page.url)
+
+    browser.close()

@@ -26,10 +26,13 @@ with sync_playwright() as p:
         wait_until="networkidle"
     )
 
-    print("TÍTULO DA PÁGINA:")
-    print(page.title())
-
-    print("\nURL FINAL:")
+    print("URL FINAL:")
     print(page.url)
+
+    print("\nTEXTO DA PÁGINA:\n")
+
+    texto = page.locator("body").inner_text()
+
+    print(texto[:5000])
 
     browser.close()

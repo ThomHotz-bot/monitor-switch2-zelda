@@ -14,27 +14,46 @@ total_parcelado = 4299
 
 arquivo = "precos.csv"
 
+ultimo_preco = None
 menor_preco_historico = None
 
 if os.path.exists(arquivo):
 
     with open(arquivo, "r", encoding="utf-8") as f:
 
-        leitor = csv.DictReader(f)
+        leitor = list(csv.DictReader(f))
 
-        precos = []
-
-        for linha in leitor:
+        if leitor:
 
             try:
-                precos.append(
-                    float(linha["preco_avista"])
+                ultimo_preco = float(
+                    leitor[-1]["preco_avista"]
                 )
             except:
                 pass
 
-        if precos:
-            menor_preco_historico = min(precos)
+            try:
+                precos = [
+                    float(x["preco_avista"])
+                    for x in leitor
+                ]
+
+                menor_preco_historico = min(precos)
+
+            except:
+                pass
+
+if ultimo_preco == preco_avista:
+
+    print(
+        "Preço igual ao último registro."
+    )
+
+    print(
+        "Nenhuma ação necessária."
+    )
+
+    exit()
 
 novo_recorde = False
 
@@ -111,10 +130,3 @@ R$ {PRECO_ALVO}
     )
 
     print("Oferta dentro da meta")
-
-else:
-
-    print(
-        f"Menor preço histórico: "
-        f"{menor_preco_historico}"
-    )

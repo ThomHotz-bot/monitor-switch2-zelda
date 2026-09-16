@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 import csv
+import re
 
 with open(
     "produtos.csv",
@@ -26,16 +27,18 @@ with sync_playwright() as p:
         wait_until="networkidle"
     )
 
-    print("TÍTULO:")
-    print(page.title())
-
-    print("\nURL FINAL:")
-    print(page.url)
-
-    print("\nTEXTO DA PÁGINA:\n")
-
     texto = page.locator("body").inner_text()
 
-    print(texto[:3000])
-
     browser.close()
+
+print("PROCURANDO PREÇO...")
+
+padrao = r"R\$ ?([0-9\.]+,[0-9]{2})"
+
+precos = re.findall(
+    padrao,
+    texto
+)
+
+print("PREÇOS ENCONTRADOS:")
+print(precos[:20])

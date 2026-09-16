@@ -1,43 +1,30 @@
 from datetime import datetime
-import pandas as pd
+import csv
 import os
 import requests
 
-ARQUIVO = "precos.csv"
-
 PRECO_ALVO = float(os.getenv("PRICE_TARGET", 3799))
 
-# PREÇO DE TESTE
-# Depois vamos substituir pela busca real nas lojas
 preco_atual = 3999
 
-nova_linha = pd.DataFrame([
-    {
-        "data": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "loja": "Teste",
-        "preco": preco_atual,
-        "link": "https://exemplo.com"
-    }
-])
+arquivo = "precos.csv"
 
-if os.path.exists(ARQUIVO):
-    historico = pd.read_csv(ARQUIVO)
+if not os.path.exists(arquivo):
+    with open(arquivo, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["data", "loja", "preco", "link"])
 
-    historico = pd.concat(
-        [historico, nova_linha],
-        ignore_index=True
-    )
-else:
-    historico = nova_linha
+with open(arquivo, "a", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
 
-historico.to_csv(
-    ARQUIVO,
-    index=False
-)
+    writer.writerow([
+        datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "Teste",
+        preco_atual,
+        "https://exemplo.com"
+    ])
 
 print("Histórico atualizado")
-print(f"Preço atual: {preco_atual}")
-print(f"Preço alvo: {PRECO_ALVO}")
 
 if preco_atual <= PRECO_ALVO:
 
@@ -51,20 +38,16 @@ if preco_atual <= PRECO_ALVO:
             "text": f"""
 🎮 Nintendo Switch 2 Zelda
 
-Preço encontrado:
-R$ {preco_atual}
+Preço encontrado: R$ {preco_atual}
 
-Meta:
-R$ {PRECO_ALVO}
+Meta: R$ {PRECO_ALVO}
 
 ✅ Oferta dentro da meta
 """
         }
     )
 
-    print(f"Status Telegram: {resposta.status_code}")
-    print("Alerta enviado")
+    print("Status Telegram:", resposta.status_code)
 
 else:
     print("Preço acima da meta")
-``

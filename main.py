@@ -15,9 +15,7 @@ with open(
 url = produto["url"]
 
 headers = {
-    "User-Agent": (
-        "Mozilla/5.0"
-    )
+    "User-Agent": "Mozilla/5.0"
 }
 
 resposta = requests.get(
@@ -28,10 +26,27 @@ resposta = requests.get(
 
 print("Status:", resposta.status_code)
 
-precos = re.findall(
-    r'"price"\s*:\s*([0-9]+(?:\.[0-9]+)?)',
-    resposta.text
-)
+texto = resposta.text
 
-print("Preços encontrados:")
-print(precos[:20])
+print("\n=== BUSCANDO REFERÊNCIAS DE PREÇO ===\n")
+
+padroes = [
+    r'price',
+    r'PRICE',
+    r'amount',
+    r'currency',
+    r'offers'
+]
+
+for padrao in padroes:
+
+    print(f"\n--- {padrao} ---")
+
+    encontrados = re.findall(
+        rf'.{{0,100}}{padrao}.{{0,100}}',
+        texto,
+        re.IGNORECASE
+    )
+
+    for item in encontrados[:10]:
+        print(item)

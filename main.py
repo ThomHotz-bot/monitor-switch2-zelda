@@ -8,7 +8,7 @@ PRODUTO = "Nintendo Switch 2 Zelda 40 Anos"
 PRECO_ALVO = float(os.getenv("PRICE_TARGET", 3799))
 
 # PREÇO DE TESTE
-preco_avista = 3899
+preco_avista = 3799
 parcelas = "10x 429,90"
 total_parcelado = 4299
 

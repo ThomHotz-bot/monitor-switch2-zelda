@@ -1,47 +1,112 @@
 from datetime import datetime
+from bs4 import BeautifulSoup
 import csv
 import os
 import requests
 
-PRODUTO = "Nintendo Switch 2 Zelda 40 Anos"
-
 PRECO_ALVO = float(os.getenv("PRICE_TARGET", 3799))
 
-# PREÇO DE TESTE
-preco_avista = 3799
-parcelas = "10x 429,90"
-total_parcelado = 4299
+ARQUIVO_PRODUTOS = "produtos.csv"
+ARQUIVO_PRECOS = "precos.csv"
 
-arquivo = "precos.csv"
+
+def buscar_preco_mercadolivre(url):
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 "
+            "(Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 "
+            "(KHTML, like Gecko) "
+            "Chrome/120.0 Safari/537.36"
+        )
+    }
+
+    resposta = requests.get(
+        url,
+        headers=headers,
+        timeout=30
+    )
+
+    print("Status página:", resposta.status_code)
+
+    soup = BeautifulSoup(
+        resposta.text,
+        "lxml"
+    )
+
+    meta = soup.find(
+        "meta",
+        attrs={"itemprop": "price"}
+    )
+
+    if meta:
+        return float(meta["content"])
+
+    return None
+
+
+with open(
+    ARQUIVO_PRODUTOS,
+    "r",
+    encoding="utf-8"
+) as f:
+
+    leitor = csv.DictReader(f)
+
+    produto = next(leitor)
+
+nome_produto = produto["produto"]
+fonte = produto["fonte"]
+url = produto["url"]
+
+print("Produto:", nome_produto)
+
+preco_avista = buscar_preco_mercadolivre(url)
+
+print("Preço encontrado:", preco_avista)
+
+if preco_avista is None:
+    raise Exception(
+        "Não foi possível localizar o preço."
+    )
+
+parcelas = "-"
+total_parcelado = preco_avista
 
 ultimo_preco = None
 menor_preco_historico = None
 
-if os.path.exists(arquivo):
+with open(
+    ARQUIVO_PRECOS,
+    "r",
+    encoding="utf-8"
+) as f:
 
-    with open(arquivo, "r", encoding="utf-8") as f:
+    leitor = list(csv.DictReader(f))
 
-        leitor = list(csv.DictReader(f))
+    if leitor:
 
-        if leitor:
+        try:
+            ultimo_preco = float(
+                leitor[-1]["preco_avista"]
+            )
+        except:
+            pass
 
-            try:
-                ultimo_preco = float(
-                    leitor[-1]["preco_avista"]
-                )
-            except:
-                pass
+        try:
 
-            try:
-                precos = [
-                    float(x["preco_avista"])
-                    for x in leitor
-                ]
+            precos = [
+                float(x["preco_avista"])
+                for x in leitor
+            ]
 
-                menor_preco_historico = min(precos)
+            menor_preco_historico = min(
+                precos
+            )
 
-            except:
-                pass
+        except:
+            pass
 
 if ultimo_preco == preco_avista:
 
@@ -49,11 +114,7 @@ if ultimo_preco == preco_avista:
         "Preço igual ao último registro."
     )
 
-    print(
-        "Nenhuma ação necessária."
-    )
-
-    exit()
+    quit()
 
 novo_recorde = False
 
@@ -64,7 +125,7 @@ if (
     novo_recorde = True
 
 with open(
-    arquivo,
+    ARQUIVO_PRECOS,
     "a",
     newline="",
     encoding="utf-8"
@@ -73,20 +134,25 @@ with open(
     writer = csv.writer(f)
 
     writer.writerow([
-        datetime.now().strftime("%Y-%m-%d %H:%M"),
-        PRODUTO,
-        "Teste",
+        datetime.now().strftime(
+            "%Y-%m-%d %H:%M"
+        ),
+        nome_produto,
+        fonte,
         preco_avista,
         parcelas,
         total_parcelado,
-        "https://exemplo.com",
-        "Teste"
+        url,
+        fonte
     ])
 
-print("Histórico atualizado")
+token = os.getenv(
+    "TELEGRAM_BOT_TOKEN"
+)
 
-token = os.getenv("TELEGRAM_BOT_TOKEN")
-chat_id = os.getenv("TELEGRAM_CHAT_ID")
+chat_id = os.getenv(
+    "TELEGRAM_CHAT_ID"
+)
 
 if novo_recorde:
 
@@ -97,18 +163,19 @@ if novo_recorde:
             "text": f"""
 🏆 NOVO MENOR PREÇO HISTÓRICO
 
-{PRODUTO}
+{nome_produto}
 
-Novo preço:
+Loja:
+{fonte}
+
+Preço:
 R$ {preco_avista}
 
-Menor preço anterior:
-R$ {menor_preco_historico}
+Link:
+{url}
 """
         }
     )
-
-    print("Novo recorde encontrado")
 
 elif preco_avista <= PRECO_ALVO:
 
@@ -117,7 +184,12 @@ elif preco_avista <= PRECO_ALVO:
         json={
             "chat_id": chat_id,
             "text": f"""
-🎮 {PRODUTO}
+🎮 PREÇO DENTRO DA META
+
+{nome_produto}
+
+Loja:
+{fonte}
 
 Preço:
 R$ {preco_avista}
@@ -125,9 +197,8 @@ R$ {preco_avista}
 Meta:
 R$ {PRECO_ALVO}
 
-✅ Oferta dentro da meta
+Link:
+{url}
 """
         }
     )
-
-    print("Oferta dentro da meta")

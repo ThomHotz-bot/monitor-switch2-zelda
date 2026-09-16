@@ -31,14 +31,12 @@ with sync_playwright() as p:
 
     browser.close()
 
-print("PROCURANDO PREÇO...")
+print("PROCURANDO VALORES...")
 
-padrao = r"R\$ ?([0-9\.]+,[0-9]{2})"
-
-precos = re.findall(
-    padrao,
+valores = re.findall(
+    r"[0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}",
     texto
 )
 
-print("PREÇOS ENCONTRADOS:")
-print(precos[:20])
+print("VALORES ENCONTRADOS:")
+print(valores[:50])

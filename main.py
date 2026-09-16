@@ -3,10 +3,11 @@ import csv
 import os
 import requests
 
+PRODUTO = "Nintendo Switch 2 Zelda 40 Anos"
+
 PRECO_ALVO = float(os.getenv("PRICE_TARGET", 3799))
 
-# VALORES DE TESTE
-# Em breve vamos trocar por coleta real
+# DADOS DE TESTE
 preco_avista = 3999
 parcelas = "10x 429,90"
 total_parcelado = 4299
@@ -16,8 +17,10 @@ arquivo = "precos.csv"
 if not os.path.exists(arquivo):
     with open(arquivo, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
+
         writer.writerow([
             "data",
+            "produto",
             "loja",
             "preco_avista",
             "parcelas",
@@ -30,6 +33,7 @@ with open(arquivo, "a", newline="", encoding="utf-8") as f:
 
     writer.writerow([
         datetime.now().strftime("%Y-%m-%d %H:%M"),
+        PRODUTO,
         "Teste",
         preco_avista,
         parcelas,
@@ -49,7 +53,7 @@ if preco_avista <= PRECO_ALVO:
         json={
             "chat_id": chat_id,
             "text": f"""
-🎮 Nintendo Switch 2 Zelda
+🎮 {PRODUTO}
 
 Preço à vista:
 R$ {preco_avista}

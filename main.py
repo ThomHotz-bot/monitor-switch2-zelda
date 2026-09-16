@@ -80,6 +80,7 @@ with open(
         parcelas,
         total_parcelado,
         "https://exemplo.com"
+        "Teste"
     ])
 
 print("Histórico atualizado")

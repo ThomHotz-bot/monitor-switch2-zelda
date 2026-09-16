@@ -1,0 +1,12 @@
+name: Monitor Switch 2 Zelda
+
+on:
+  workflow_dispatch:
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: TESTE NOVO
+        run: echo "TESTE NOVO FUNCIONANDO"
